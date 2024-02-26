@@ -1,42 +1,58 @@
 import React from 'react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import './style.scss'
 
 import useFetch from '../../../hooks/useFetch'
+import Img from '../../../components/LazyLoadImage/img'
+import ContentWrapper from '../../../components/contentWrapper/ContentWrapper'
 
 const HeroBanner = () => {
-const [background , setBackground] = useState('')
-const [query , setQuery] = useState('')
-const navigate = useNavigate();
+    const [background, setBackground] = useState('')
+    const [query, setQuery] = useState('')
+    const navigate = useNavigate();
+    const {url} = useSelector((state)=> state.home)
 
-const {data , loading} = useFetch("/movie/upcoming")
+    const { data, loading } = useFetch("/movie/upcoming")
 
-const searchQueryHandler = (event) =>{
-if(event.key === "Enter" && query.length>0){
-navigate(`/search/${query}`)
-}
-}
-  return (
-   <div className="heroBanner">
-    <div className="wrapper">
-        <div className="heroBannerContent">
-            <span className="title">Welcome</span>
-            <span className='subTitle'>
-                Millions of movies , TV shows and people to discover.
-            Explore now.
-            </span>
-            <div className="searchInput">
-                <input type="text"
-                onKeyUp={searchQueryHandler}
-                onChange={(e)=> setQuery(e.target.value)}
-                placeholder='Search for a movie or TV show....' />
-                <button>Search</button>
+    useEffect(() => {
+        const bg =  url.backdrop + data?.results?.[Math.floor(Math.random() * 20)]?.backdrop_path
+        setBackground(bg)
+    }, [data])
+
+    const searchQueryHandler = (event) => {
+        if (event.key === "Enter" && query.length > 0) {
+            navigate(`/search/${query}`)
+        }
+    }
+    return (
+        <div className="heroBanner">
+           {!loading && <div className="backdrop-img">
+                <Img src={background}/>
+            </div>}
+            <div className="opacity-layer"></div>
+            <ContentWrapper>
+            <div className="wrapper">
+                <div className="heroBannerContent">
+                    <span className="title">Welcome</span>
+                    <span className='subTitle'>
+                        Millions of movies , TV shows and people to discover.
+                        Explore now.
+                    </span>
+                    <div className="searchInput">
+                        <input type="text"
+                            onKeyUp={searchQueryHandler}
+                            onChange={(e) => setQuery(e.target.value)}
+                            placeholder='Search for a movie or TV show....' />
+                        <button>Search</button>
+                    </div>
+                </div>
             </div>
+            </ContentWrapper>
+           
         </div>
-    </div>
-   </div>
-  )
+    )
 }
 
 export default HeroBanner
